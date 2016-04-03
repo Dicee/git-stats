@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Language" content="en-us">
+	</head>
+	
+	<body>
+		Name of the repository:<br>
+		<form method="GET" action="github.html">
+			<input type="hidden" name="action" value="search"/>
+			<input name="keyword" type="text" id="keyword"/>
+			<input type="submit" value="Search"/>
+		</form> 
+		<p id="node"></p>
+		 
+		<ul id="searchResults">
+		</ul>
+		 
+		<script type="text/javascript" src="utils.js"></script>
+		<script type="text/javascript"> 
+			if (params.action === "search" && params.keyword) search(params.keyword);
+			
+			function search(keyword) {
+				callGitApi("search/repositories?q=" + keyword, listRepositories);
+			}
+
+			function listRepositories(response) {
+				var results = document.getElementById("searchResults");
+				var addItem = function(child) {
+					var item  = document.createElement("li");
+					item.appendChild(child);
+					results.appendChild(item);
+				}
+				
+				var repos = response.items;
+				if (repos.length == 0) { 
+					addItem(document.createTextNode("No result to display"));
+					return;
+				}
+				
+				for (var i = 0; i < repos.length; i++) {
+					var link       = document.createElement("a");
+					link.href      = "show-repo.html?action=show-repo&repo=" + repos[i].full_name;
+					link.alt       = "See repository " + repos[i].full_name;
+					link.innerHTML = repos[i].full_name;
+					addItem(link);
+				}
+			}
+		</script>
+	</body>
+</html>
