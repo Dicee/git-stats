@@ -8,7 +8,6 @@ function showRepo(repo) {
     var committers         = new Set();
     var committersList     = document.getElementById("committers");
     var latestCommits      = [];
-    var latestCommitsStats = [];
 
     consumeAllCommits(repo, function (commitJSON, eof) {
         var committer = commitJSON.commit.committer;
@@ -18,36 +17,33 @@ function showRepo(repo) {
             committersList.appendChild(item);
             committers.add(committer.name);
         }
-        generateGitStats(commitJSON, latestCommits, latestCommitsStats, eof);
+        generateGitStats(commitJSON, latestCommits, eof);
     });
 }
 
-function generateGitStats(commitJSON, latestCommits, latestCommitsStats, eof) {
+function generateGitStats(commitJSON, latestCommits, eof) {
     var commit    = commitJSON.commit;
     var committer = commit.committer;
 
-    //if (latestCommitsStats.length < 100) {
-        latestCommits     .push({ committerName: committer.name, message: commit.message, date: new Date(committer.date) });
-        latestCommitsStats.push(new CommitStat(committer.name, 1));
+    //if (latestCommits.length < 100) {
+        latestCommits.push({ committerName: committer.name, message: commit.message, date: new Date(committer.date) });
     //}
     if (eof) {
-        var committersStats = new Map();
-        for (let commitStat of latestCommitsStats) {
-            var existingStat = committersStats.get(commitStat.committerName);
-            committersStats.set(commitStat.committerName, !existingStat ? commitStat : existingStat.sum(commitStat));
-        }
-
-        var stats = Array.from(committersStats.values())
-                         .sort(function(x, y) { return y.commits - x.commits })
-                         .map(function(stat) { return new Array(stat.committerName, stat.commits) });
-        stats.unshift(new Array("Committer", "Commits"));
-
-        displayBestCommittersChart(stats);
+        displayBestCommittersChart(latestCommits);
         displayCommitsTimelineChart(latestCommits, stats.length);
     }
 }
 
-function displayBestCommittersChart(stats) {
+function displayBestCommittersChart(commits) {
+    var committersStats = new Map();
+    for (let commit of commits) {
+        var existingStat = committersStats.get(commit.committerName);
+        committersStats.set(commit.committerName, (!existingStat ? 0 : existingStat) + 1);
+    }
+
+    var stats = Array.from(committersStats.entries()).sort(function(x, y) { return y[1] - x[1]; });
+    stats.unshift(new Array("Committer", "Commits"));
+
     var data = new google.visualization.arrayToDataTable(stats);
     var chart = new google.charts.Bar(document.getElementById('bestCommittersChart'));
     var options = {
@@ -114,12 +110,4 @@ function getCommitsPage(repo, pageIndex, callback) {
     callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
         callback(commits, commits.length < expectedCommits);
     });
-}
-
-function CommitStat(committerName, commits) {
-    this.committerName = committerName;
-    this.commits       = commits;
-    this.sum           = function(that) {
-        return this.committerName !== that.committerName ? undefined : new CommitStat(this.committerName, this.commits + that.commits);
-    }
 }
