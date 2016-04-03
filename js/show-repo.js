@@ -79,7 +79,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
     var getKey = function(commit) { return commit.committerName + "," + commit.date.roundToDay().getTime(); }
 
     // group the commits by author and date
-    var commitsByAuthorAndDate = { };
+    var commitsByAuthorAndDate = new Map();
     for (let commit of commits) {
         var key           = getKey(commit);
         var existingValue = commitsByAuthorAndDate.get(key);
