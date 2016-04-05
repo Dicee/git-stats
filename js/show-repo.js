@@ -19,6 +19,8 @@ function showRepo(repo) {
         }
         generateGitStats(commitJSON, latestCommits, committers, eof);
     });
+
+    callGitApi("repos/" + repo + "/stats/contributors", displayLinesContributionChart);
 }
 
 function generateGitStats(commitJSON, latestCommits, committers, eof) {
@@ -60,6 +62,50 @@ function displayBestCommittersChart(commits) {
         bar: { groupWidth: "90%" }
     };
     chart.draw(data, options);
+}
+
+function displayLinesContributionChart(contributions) {
+    if (!contributions[0]) return;
+
+    var committers = [];
+    var data       = [];
+    var first      = true;
+
+    for (let week of contributions[0].weeks) data.push([ new Date(week.w * 1000) ]);
+
+    var latestWeekWithData = 0;
+    for (let contribution of contributions) {
+        committers.push(contribution.author.login);
+
+        var total = 0;
+        var weeks = contribution.weeks;
+        for (var i = 0; i < weeks.length; i++) {
+            var changesThisWeek = weeks[i].a + weeks[i].d;
+            data[i].push(total += changesThisWeek);
+            if (changesThisWeek > 0) { console.log(changesThisWeek, latestWeekWithData); latestWeekWithData = Math.max(latestWeekWithData, i); }
+        }
+    }
+
+    var dataTable = new google.visualization.DataTable();
+    dataTable.addColumn("date", "Time");
+
+    for (let committer of committers) dataTable.addColumn("number", committer);
+    dataTable.addRows(data.slice(0, latestWeekWithData + 1));
+
+    var options = {
+        height: 400,
+        hAxis: {
+            title: "Time",
+            format: "MMM d, y"
+        },
+        vAxis: {
+          title: "Total contributions"
+        },
+        legend: { position: "bottom" }
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById("commitsOvertimeChart"));
+    chart.draw(dataTable, options);
 }
 
 function displayCommitsTimelineChart(commits, numberOfCommitters) {

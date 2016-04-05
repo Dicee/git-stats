@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Language" content="en-us">
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script type="text/javascript">
-			google.charts.load('current', {packages: ['bar', 'timeline']});
+			google.charts.load('current', {packages: ['bar', 'corechart', 'line', 'timeline']});
 		</script>
 	</head>
 	
@@ -16,11 +16,14 @@
 			<input type="submit" value="Search"/>
 		</form> 
 		 
-		 Committers:<br>
-		 <ul id="committers"></ul>
-		 <div id="bestCommittersChart"></div>
-		 
-		 <br><br>Commits:<br><br>
+		<h3>Committers:</h3>
+		<ul id="committers"></ul>
+		<div id="bestCommittersChart"></div>
+
+		<h3>Total changes over time:</h3>
+		<div id="commitsOvertimeChart"></div>
+
+		 <h3>Commits:</h3>
 		 <div id="commitsTimelineChart"></div>
 		 <p id="node"></p>
 		 
