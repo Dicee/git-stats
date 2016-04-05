@@ -22,24 +22,6 @@ function ajaxCall(url, callback) {
     xhttp.send();
 }
 
-Object.prototype.getOrElse = function(key, fallback) {
-    return this[key] === undefined ? fallback : this[key];
-};
-
-Object.prototype.putIfAbsent = function(key, value) {
-    if (this[key]) return this[key];
-    this[key] = value;
-    return value;
-};
-
-Object.prototype.keys = function() {
-    var keys = [];
-    for (var key in this) {
-        if (this.hasOwnProperty(key)) keys.push(key);
-    }
-    return keys;
-};
-
 Date.prototype.plusDays = function(days) {
     var copy = this.copy();
     copy.setDate(this.getDate() + days);
