@@ -17,11 +17,11 @@ function showRepo(repo) {
             committersList.appendChild(item);
             committers.add(committer.name);
         }
-        generateGitStats(commitJSON, latestCommits, eof);
+        generateGitStats(commitJSON, latestCommits, committers, eof);
     });
 }
 
-function generateGitStats(commitJSON, latestCommits, eof) {
+function generateGitStats(commitJSON, latestCommits, committers, eof) {
     var commit    = commitJSON.commit;
     var committer = commit.committer;
 
@@ -30,7 +30,7 @@ function generateGitStats(commitJSON, latestCommits, eof) {
     //}
     if (eof) {
         displayBestCommittersChart(latestCommits);
-        displayCommitsTimelineChart(latestCommits, stats.length);
+        displayCommitsTimelineChart(latestCommits, committers.size);
     }
 }
 
