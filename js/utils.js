@@ -40,3 +40,5 @@ Date.prototype.roundToDay = function() {
 Date.prototype.copy = function() {
     return new Date(this.getTime());
 };
+
+function debug(anything) { console.log(JSON.stringify(anything)); }
