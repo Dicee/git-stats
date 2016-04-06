@@ -90,6 +90,10 @@ function displayContributionsCharts(contributions) {
     baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeTotalChanges, committers, "Total changes", "totalChangesOvertimeChart")
     baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeEffectiveChanges, committers, "Total effective changes", "totalEffectiveChangesOvertimeChart")
     baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeTotalCommits, committers, "Total commits over time", "totalCommitsOvertimeChart")
+
+    var headers = [ "Committers", "Total contribution" ];
+    baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData, computeTotalChanges, committers, "Total changes", headers, "totalChangesAggregatePieChart");
+    baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData, computeTotalCommits, committers, "Total commits", headers, "totalCommitsAggregatePieChart");
 }
 
 function baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId) {
@@ -123,6 +127,25 @@ function baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData
 
     var chart = new google.visualization.LineChart(document.getElementById(containerId));
     chart.draw(dataTable, options);
+}
+
+function baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData, mapToInt, committers, title, headers, containerId) {
+    var data = Array.from({length: committers.length}, _ => Array(2).fill(0));
+
+    for (var i = 0; i < data.length; i++) data[i][0] = committers[i];
+    for (var i = 0; i < lastWeekWithData; i++) {
+        for (var j = 0; j < data.length; j++) {
+            // the first column contains the date, which we don't care about
+            data[j][1] += mapToInt(changesOverTime[i][j + 1]);
+            if (committers[i] == "Dicee") console.log(mapToInt(changesOverTime[i][j]));
+        }
+    }
+    data.unshift(headers);
+
+    var dataTable = google.visualization.arrayToDataTable(data);
+
+    var chart = new google.visualization.PieChart(document.getElementById(containerId));
+    chart.draw(dataTable, { title: title });
 }
 
 function displayCommitsTimelineChart(commits, numberOfCommitters) {
