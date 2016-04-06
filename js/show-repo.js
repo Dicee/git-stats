@@ -83,17 +83,18 @@ function displayContributionsCharts(contributions) {
         }
     }
 
-    var genericDisplayContributionsChartClosure = function(mapToInt, vAxisTitle, containerId) {
-        genericDisplayContributionsChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId);
-    }
-    genericDisplayContributionsChartClosure(function(week) { return week.a + week.d; }, "Total changes", "totalChangesOvertimeChart")
-    genericDisplayContributionsChartClosure(function(week) { return week.a - week.d; }, "Total effective changes", "totalEffectiveChangesOvertimeChart")
-    genericDisplayContributionsChartClosure(function(week) { return week.c; }, "Total commits over time", "totalCommitsOvertimeChart")
+    var computeTotalChanges     = function(week) { return week.a + week.d; };
+    var computeEffectiveChanges = function(week) { return week.a - week.d; };
+    var computeTotalCommits     = function(week) { return week.c         ; };
+
+    baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeTotalChanges, committers, "Total changes", "totalChangesOvertimeChart")
+    baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeEffectiveChanges, committers, "Total effective changes", "totalEffectiveChangesOvertimeChart")
+    baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, computeTotalCommits, committers, "Total commits over time", "totalCommitsOvertimeChart")
 }
 
-function genericDisplayContributionsChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId) {
+function baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId) {
     // aggregate the data
-    var data = Array.from({length: lastWeekWithData + 20}, _ => Array(changesOverTime[0].length).fill(0));
+    var data = Array.from({length: lastWeekWithData}, _ => Array(changesOverTime[0].length).fill(0));
     for (var i = 0; i < data.length; i++) {
         // the first column contains the date field
         data[i][0] = changesOverTime[i][0];
@@ -109,7 +110,7 @@ function genericDisplayContributionsChart(changesOverTime, lastWeekWithData, map
     dataTable.addRows(data);
 
     var options = {
-        height: 400,
+        height: 450,
         hAxis: {
             title: "Time",
             format: "MMM d, y"
