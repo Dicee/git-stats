@@ -20,7 +20,7 @@ function showRepo(repo) {
         generateGitStats(commitJSON, latestCommits, committers, eof);
     });
 
-    callGitApi("repos/" + repo + "/stats/contributors", displayLinesContributionChart);
+    callGitApi("repos/" + repo + "/stats/contributors", displayContributionsCharts);
 }
 
 function generateGitStats(commitJSON, latestCommits, committers, eof) {
@@ -64,25 +64,41 @@ function displayBestCommittersChart(commits) {
     chart.draw(data, options);
 }
 
-function displayLinesContributionChart(contributions) {
+function displayContributionsCharts(contributions) {
     if (!contributions[0]) return;
 
-    var committers = [];
-    var data       = [];
-    var first      = true;
+    var committers      = [];
+    var changesOverTime = [];
 
-    for (let week of contributions[0].weeks) data.push([ new Date(week.w * 1000) ]);
+    for (let week of contributions[0].weeks) changesOverTime.push([ new Date(week.w * 1000) ]);
 
-    var latestWeekWithData = 0;
+    var lastWeekWithData = 0;
     for (let contribution of contributions) {
         committers.push(contribution.author.login);
 
-        var total = 0;
         var weeks = contribution.weeks;
         for (var i = 0; i < weeks.length; i++) {
-            var changesThisWeek = weeks[i].a + weeks[i].d;
-            data[i].push(total += changesThisWeek);
-            if (changesThisWeek > 0) { console.log(changesThisWeek, latestWeekWithData); latestWeekWithData = Math.max(latestWeekWithData, i); }
+            changesOverTime[i].push(weeks[i]);
+            if (weeks[i].a || weeks[i].d) lastWeekWithData = Math.max(lastWeekWithData, i);
+        }
+    }
+
+    var genericDisplayContributionsChartClosure = function(mapToInt, vAxisTitle, containerId) {
+        genericDisplayContributionsChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId);
+    }
+    genericDisplayContributionsChartClosure(function(week) { return week.a + week.d; }, "Total changes", "totalChangesOvertimeChart")
+    genericDisplayContributionsChartClosure(function(week) { return week.a - week.d; }, "Total effective changes", "totalEffectiveChangesOvertimeChart")
+    genericDisplayContributionsChartClosure(function(week) { return week.c; }, "Total commits over time", "totalCommitsOvertimeChart")
+}
+
+function genericDisplayContributionsChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId) {
+    // aggregate the data
+    var data = Array.from({length: lastWeekWithData + 20}, _ => Array(changesOverTime[0].length).fill(0));
+    for (var i = 0; i < data.length; i++) {
+        // the first column contains the date field
+        data[i][0] = changesOverTime[i][0];
+        for (var j = 1; j < changesOverTime[i].length; j++) {
+            data[i][j] = mapToInt(changesOverTime[i][j]) + (i > 0 ? data[i - 1][j] : 0);
         }
     }
 
@@ -90,7 +106,7 @@ function displayLinesContributionChart(contributions) {
     dataTable.addColumn("date", "Time");
 
     for (let committer of committers) dataTable.addColumn("number", committer);
-    dataTable.addRows(data.slice(0, latestWeekWithData + 1));
+    dataTable.addRows(data);
 
     var options = {
         height: 400,
@@ -99,12 +115,12 @@ function displayLinesContributionChart(contributions) {
             format: "MMM d, y"
         },
         vAxis: {
-          title: "Total contributions"
+          title: vAxisTitle
         },
         legend: { position: "bottom" }
     };
 
-    var chart = new google.visualization.LineChart(document.getElementById("commitsOvertimeChart"));
+    var chart = new google.visualization.LineChart(document.getElementById(containerId));
     chart.draw(dataTable, options);
 }
 
