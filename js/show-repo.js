@@ -141,7 +141,6 @@ function baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData
         for (var j = 0; j < data.length; j++) {
             // the first column contains the date, which we don't care about
             data[j][1] += mapToInt(changesOverTime[i][j + 1]);
-            if (committers[i] == "Dicee") console.log(mapToInt(changesOverTime[i][j]));
         }
     }
     data.unshift(headers);
@@ -185,41 +184,49 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
 }
 
 function displayPerTimeOfDayStatsChart(commits, committers) {
-    var hoursInDay                = 24
-    var commitsPerDayAndCommitter = new Array(hoursInDay);
-    for (var i = 0; i < hoursInDay; i++) commitsPerDayAndCommitter[i] = new Counter(committers);
-    for (let commit of commits) commitsPerDayAndCommitter[commit.date.getHours()].inc(commit.committerName);
+    var hoursInDay = 24
+    var timeOfDay  = function(time) { return {v: [time, 0, 0], f: time + " am"}; };
+    displayStackedChartPerTimeRange(
+        commits, committers, hoursInDay,
+        function(date) { return date.getHours(); }, timeOfDay,
+        "Commits throughout the day", "timeofday", "Time of day", "h:mm a", [0, 0, 0], [23, 0, 0],
+        "commitsPerTimeOfDayChart");
+}
 
-    var timeOfDay = function(time) { return {v: [time, 0, 0], f: time + " am"}; };
-    var data      = [];
-    for (var i = 0; i < hoursInDay; i++) {
-        var statsOfHour = [ timeOfDay(i) ];
-        statsOfHour.push(...Array.from(commitsPerDayAndCommitter[i].map.values()));
-        data.push(statsOfHour);
+function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, dateToRange, rangeToObj, title, rangeType, rangeTitle, rangeFormat, min, max, containerId) {
+    var commitsPerTimeRangeAndCommitter = new Array(numberOfRanges);
+    for (var i = 0; i < numberOfRanges; i++) commitsPerTimeRangeAndCommitter[i] = new Counter(committers);
+    for (let commit of commits) commitsPerTimeRangeAndCommitter[dateToRange(commit.date)].inc(commit.committerName);
+
+    var data = [];
+    for (var i = 0; i < numberOfRanges; i++) {
+        var statsOfRange = [ rangeToObj(i) ];
+        statsOfRange.push(...Array.from(commitsPerTimeRangeAndCommitter[i].map.values()));
+        data.push(statsOfRange);
     }
 
     var dataTable = new google.visualization.DataTable();
-    dataTable.addColumn('timeofday', 'Time of Day');
-    for (let committer of committers) dataTable.addColumn('number', committer);
+    dataTable.addColumn(rangeType, rangeTitle);
+    for (let committer of committers) dataTable.addColumn("number", committer);
     dataTable.addRows(data);
 
     var options = {
-        title: 'Commits throughout the day',
+        title: title,
         isStacked: true,
         hAxis: {
-          title: 'Time of day',
-          format: 'h:mm a',
+          title: rangeTitle,
+          format: rangeFormat,
           viewWindow: {
-            min: [0, 0, 0],
-            max: [23, 0, 0]
+            min: min,
+            max: max
           }
         },
         width: 1000,
         height: 500,
-        vAxis: { title: 'Number of commits' }
+        vAxis: { title: "Number of commits" }
     };
 
-    var chart = new google.visualization.ColumnChart(document.getElementById("commitsPerTimeOfDayChart"));
+    var chart = new google.visualization.ColumnChart(document.getElementById(containerId));
     chart.draw(dataTable, options);
 }
 
