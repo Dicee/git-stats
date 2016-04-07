@@ -33,10 +33,9 @@ function generateGitStats(commitJSON, latestCommits, committers, eof) {
     if (eof) {
         displayBestCommittersChart(latestCommits);
 
-        var nbCommitters = committers.size;
-        displayCommitsTimelineChart(latestCommits, nbCommitters);
-//        displayPerDayOfWeekStatsChart(latestCommits, nbCommitters);
-        displayPerTimeOfDayStatsChart(latestCommits, committers);
+        displayCommitsTimelineChart  (latestCommits, committers.size);
+        displayPerDayOfWeekStatsChart(latestCommits, committers     );
+        displayPerTimeOfDayStatsChart(latestCommits, committers     );
     }
 }
 
@@ -180,7 +179,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
         var tooltip       = "<ul>" + entry[1].map(function(commit) { return "<li><b>" + commit.date + ":</b> " + commit.message + "</li>"; }).join("") + "</ul>";
         return new Array(committerName, "", tooltip, day, day.plusDays(1));
     }));
-    chart.draw(dataTable, { height: numberOfCommitters * 90 });
+    chart.draw(dataTable, { height: numberOfCommitters * 50 });
 }
 
 function displayPerTimeOfDayStatsChart(commits, committers) {
@@ -189,11 +188,21 @@ function displayPerTimeOfDayStatsChart(commits, committers) {
     displayStackedChartPerTimeRange(
         commits, committers, hoursInDay,
         function(date) { return date.getHours(); }, timeOfDay,
-        "Commits throughout the day", "timeofday", "Time of day", "h:mm a", [0, 0, 0], [23, 0, 0],
-        "commitsPerTimeOfDayChart");
+        "Commits throughout the day", "timeofday", "Time of day", "h:mm a", "commitsPerTimeOfDayChart",
+        [0, 0, 0], [23, 0, 0]);
 }
 
-function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, dateToRange, rangeToObj, title, rangeType, rangeTitle, rangeFormat, min, max, containerId) {
+function displayPerDayOfWeekStatsChart(commits, committers) {
+    var daysOfWeek = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
+    var dayOfWeek  = function(index) { return daysOfWeek[index]; };
+    displayStackedChartPerTimeRange(
+        commits, committers, daysOfWeek.length,
+        function(date) { return date.getDay(); }, dayOfWeek,
+        "Commits throughout the day", "string", "Day of week", "h:mm a", "commitsPerDayOfWeekChart",
+        [0, 0, 0], [23, 0, 0]);
+}
+
+function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, dateToRange, rangeToObj, title, rangeType, rangeTitle, rangeFormat, containerId, minRange, maxRange) {
     var commitsPerTimeRangeAndCommitter = new Array(numberOfRanges);
     for (var i = 0; i < numberOfRanges; i++) commitsPerTimeRangeAndCommitter[i] = new Counter(committers);
     for (let commit of commits) commitsPerTimeRangeAndCommitter[dateToRange(commit.date)].inc(commit.committerName);
@@ -213,18 +222,12 @@ function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, da
     var options = {
         title: title,
         isStacked: true,
-        hAxis: {
-          title: rangeTitle,
-          format: rangeFormat,
-          viewWindow: {
-            min: min,
-            max: max
-          }
-        },
+        hAxis: { title: rangeTitle, format: rangeFormat },
         width: 1000,
         height: 500,
         vAxis: { title: "Number of commits" }
     };
+    if (minRange != undefined && maxRange != undefined) options.viewWindow = { min: minRange, max: maxRange };
 
     var chart = new google.visualization.ColumnChart(document.getElementById(containerId));
     chart.draw(dataTable, options);
