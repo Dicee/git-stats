@@ -198,7 +198,7 @@ function displayPerDayOfWeekStatsChart(commits, committers) {
     displayStackedChartPerTimeRange(
         commits, committers, daysOfWeek.length,
         function(date) { return date.getDay(); }, dayOfWeek,
-        "Commits throughout the day", "string", "Day of week", "h:mm a", "commitsPerDayOfWeekChart",
+        "Commits throughout the week", "string", "Day of week", "h:mm a", "commitsPerDayOfWeekChart",
         [0, 0, 0], [23, 0, 0]);
 }
 
