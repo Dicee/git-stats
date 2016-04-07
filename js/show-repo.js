@@ -32,7 +32,11 @@ function generateGitStats(commitJSON, latestCommits, committers, eof) {
     //}
     if (eof) {
         displayBestCommittersChart(latestCommits);
-        displayCommitsTimelineChart(latestCommits, committers.size);
+
+        var nbCommitters = committers.size;
+        displayCommitsTimelineChart(latestCommits, nbCommitters);
+//        displayPerDayOfWeekStatsChart(latestCommits, nbCommitters);
+        displayPerTimeOfDayStatsChart(latestCommits, committers);
     }
 }
 
@@ -178,6 +182,45 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
         return new Array(committerName, "", tooltip, day, day.plusDays(1));
     }));
     chart.draw(dataTable, { height: numberOfCommitters * 90 });
+}
+
+function displayPerTimeOfDayStatsChart(commits, committers) {
+    var hoursInDay                = 24
+    var commitsPerDayAndCommitter = new Array(hoursInDay);
+    for (var i = 0; i < hoursInDay; i++) commitsPerDayAndCommitter[i] = new Counter(committers);
+    for (let commit of commits) commitsPerDayAndCommitter[commit.date.getHours()].inc(commit.committerName);
+
+    var timeOfDay = function(time) { return {v: [time, 0, 0], f: time + " am"}; };
+    var data      = [];
+    for (var i = 0; i < hoursInDay; i++) {
+        var statsOfHour = [ timeOfDay(i) ];
+        statsOfHour.push(...Array.from(commitsPerDayAndCommitter[i].map.values()));
+        data.push(statsOfHour);
+    }
+
+    var dataTable = new google.visualization.DataTable();
+    dataTable.addColumn('timeofday', 'Time of Day');
+    for (let committer of committers) dataTable.addColumn('number', committer);
+    dataTable.addRows(data);
+
+    var options = {
+        title: 'Commits throughout the day',
+        isStacked: true,
+        hAxis: {
+          title: 'Time of day',
+          format: 'h:mm a',
+          viewWindow: {
+            min: [0, 0, 0],
+            max: [23, 0, 0]
+          }
+        },
+        width: 1000,
+        height: 500,
+        vAxis: { title: 'Number of commits' }
+    };
+
+    var chart = new google.visualization.ColumnChart(document.getElementById("commitsPerTimeOfDayChart"));
+    chart.draw(dataTable, options);
 }
 
 function consumeAllCommits(repo, commitConsumer) {

@@ -42,3 +42,18 @@ Date.prototype.copy = function() {
 };
 
 function debug(anything) { console.log(JSON.stringify(anything)); }
+
+function Counter(keys) {
+    this.map = new Map();
+    if (keys) {
+        for (let key of keys) this.map.set(key, 0);
+    }
+
+    this.count = function (key) { return this.map.get(key) == undefined ? 0 : this.map.get(key); };
+    this.add   = function(key, n) {
+        var count = this.count(key) + n;
+        this.map.set(key, count);
+        return count;
+    }
+    this.inc = function(key) { return this.add(key, 1); }
+}
