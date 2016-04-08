@@ -1,7 +1,7 @@
 if (params.action === "search" && params.keyword != undefined) search(params.keyword);
 
 function search(keyword) {
-    if (keyword) callGitApi("search/repositories?q=" + keyword, listRepositories);
+    if (keyword) searchRepository(keyword, listRepositories);
     else         noResult();
 }
 

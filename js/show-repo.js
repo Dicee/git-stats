@@ -19,8 +19,7 @@ function showRepo(repo) {
         }
         generateGitStats(commitJSON, latestCommits, committers, eof);
     });
-
-    callGitApi("repos/" + repo + "/stats/contributors", displayContributionsCharts);
+    getContributorsStats(repo, displayContributionsCharts);
 }
 
 function generateGitStats(commitJSON, latestCommits, committers, eof) {
@@ -145,8 +144,7 @@ function baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData
     data.unshift(headers);
 
     var dataTable = google.visualization.arrayToDataTable(data);
-
-    var chart = new google.visualization.PieChart(document.getElementById(containerId));
+    var chart     = new google.visualization.PieChart(document.getElementById(containerId));
     chart.draw(dataTable, { title: title });
 }
 
@@ -231,22 +229,4 @@ function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, da
 
     var chart = new google.visualization.ColumnChart(document.getElementById(containerId));
     chart.draw(dataTable, options);
-}
-
-function consumeAllCommits(repo, commitConsumer) {
-    consumeCommitsRec(repo, 1, commitConsumer);
-}
-
-function consumeCommitsRec(repo, pageIndex, commitConsumer) {
-    getCommitsPage(repo, pageIndex, function(commits, eof) {
-        for (var i = 0; i < commits.length; i++) commitConsumer(commits[i], eof && i == commits.length - 1);
-        if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer);
-    });
-}
-
-function getCommitsPage(repo, pageIndex, callback) {
-    var expectedCommits = 100;
-    callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
-        callback(commits, commits.length < expectedCommits);
-    });
 }
