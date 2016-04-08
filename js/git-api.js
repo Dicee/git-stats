@@ -16,7 +16,7 @@ function consumeCommitsRec(repo, pageIndex, commitConsumer, limit) {
 }
 
 function getCommitsPage(repo, pageIndex, callback) {
-    var expectedCommits = 250;
+    var expectedCommits = 100;
     callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
         callback(commits, commits.length < expectedCommits);
     });
