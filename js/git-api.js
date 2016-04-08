@@ -1,6 +1,6 @@
 var keywordNormalizeRegex = new RegExp("\\s+", "gm");
 function searchRepository(keyword, callback) {
-    callGitApi("search/repositories?q7=" + keyword.trim().replace(keywordNormalizeRegex, "+"), callback);
+    callGitApi("search/repositories?q=" + keyword.trim().replace(keywordNormalizeRegex, "+"), callback);
 }
 
 function consumeCommits(repo, commitConsumer, limit) {
