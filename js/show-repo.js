@@ -54,6 +54,7 @@ function displayBestCommittersChart(commits) {
         title: 'Best committers',
         width: stats.length * 90,
         height: stats.length * 60,
+        backgroundColor: { fill:'transparent' },
         legend: { position: 'none' },
         chart: { title: 'Best committers', subtitle: '(by number of commits)' },
         bars: 'horizontal',
@@ -117,6 +118,7 @@ function baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData
 
     var options = {
         height: 450,
+        backgroundColor: { fill:'transparent' },
         hAxis: {
             title: "Time",
             format: "MMM d, y"
@@ -223,6 +225,7 @@ function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, da
         hAxis: { title: rangeTitle, format: rangeFormat },
         width: 1000,
         height: 500,
+        backgroundColor: { fill:'transparent' },
         vAxis: { title: "Number of commits" }
     };
     if (minRange != undefined && maxRange != undefined) options.viewWindow = { min: minRange, max: maxRange };
