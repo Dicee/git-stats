@@ -3,11 +3,12 @@ function searchRepository(keyword, callback) {
     callGitApi("search/repositories?q7=" + keyword.trim().replace(keywordNormalizeRegex, "+"), callback);
 }
 
-function consumeCommits(repo, commitConsumer) {
-    consumeCommitsRec(repo, 1, commitConsumer);
+function consumeCommits(repo, commitConsumer, limit) {
+    consumeCommitsRec(repo, 1, commitConsumer, limit == undefined ? Number.MAX_SAFE_INTEGER : limit);
 }
 
-function consumeCommitsRec(repo, pageIndex, commitConsumer) {
+function consumeCommitsRec(repo, pageIndex, commitConsumer, limit) {
+    if (pageIndex > limit) return;
     getCommitsPage(repo, pageIndex, function(commits, eof) {
         for (var i = 0; i < commits.length; i++) commitConsumer(commits[i], eof && i == commits.length - 1);
         if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer);
@@ -15,7 +16,7 @@ function consumeCommitsRec(repo, pageIndex, commitConsumer) {
 }
 
 function getCommitsPage(repo, pageIndex, callback) {
-    var expectedCommits = 100;
+    var expectedCommits = 250;
     callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
         callback(commits, commits.length < expectedCommits);
     });
