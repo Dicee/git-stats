@@ -1,7 +1,7 @@
 google.charts.setOnLoadCallback(parseURL);
 
 function parseURL() {
-    if (params.action === "show-repo" && params.repo) showRepo(params.repo);
+    if (params.repo) showRepo(params.repo);
 }
 
 function showRepo(repo) {

@@ -1,4 +1,4 @@
-if (params.action === "search" && params.keyword != undefined) search(params.keyword);
+search(params.keyword);
 
 function search(keyword) {
     if (keyword) searchRepository(keyword, listRepositories);
@@ -14,7 +14,7 @@ function listRepositories(response) {
 
     for (var i = 0; i < repos.length; i++) {
         var link       = document.createElement("a");
-        link.href      = "show-repo.html?action=show-repo&repo=" + repos[i].full_name;
+        link.href      = "show-repo.html?repo=" + repos[i].full_name;
         link.alt       = "See repository " + repos[i].full_name;
         link.innerHTML = repos[i].full_name;
         addItem(link);
