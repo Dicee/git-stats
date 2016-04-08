@@ -9,7 +9,7 @@ function showRepo(repo) {
     var committersList     = document.getElementById("committers");
     var latestCommits      = [];
 
-    consumeAllCommits(repo, function (commitJSON, eof) {
+    consumeCommits(repo, function (commitJSON, eof) {
         var committer = commitJSON.commit.committer;
         if (!committers.has(committer.name)) {
             var item       = document.createElement("li");
