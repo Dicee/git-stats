@@ -35,6 +35,10 @@ function ajaxCall(url, callback) {
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == 4 && xhttp.status == 200) {
             callback(JSON.parse(xhttp.responseText));
+        } else if (xhttp.status == 404 || xhttp.status == 403) {
+            alert("Error while talking to a distant server: " + JSON.parse(xhttp.responseText));
+        } else if (xhttp.status == 202) {
+            setTimeout(function() { ajaxCall(url, callback); }, 50)
         }
     };
     xhttp.send();
