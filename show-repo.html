@@ -6,48 +6,55 @@
 		<script type="text/javascript">
 			google.charts.load('current', {packages: ['bar', 'corechart', 'line', 'timeline']});
 		</script>
+		<link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
 	</head>
 	
 	<body>
-		Name of the repository:<br>
-		<form method="GET" action="github.html">
-			<input type="hidden" name="action" value="search"/>
-			<input name="keyword" type="text" id="keyword"/>
-			<input type="submit" value="Search"/>
-		</form> 
-		 
-		<h3>Committers:</h3>
-		<ul id="committers"></ul>
-		<div id="bestCommittersChart"></div>
+		<div class="col-md-2"></div>
+		<div class="col-md-8">
+			<h1 class=".page-header">git-stats</h1>
+			<form method="GET" action="github.html">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Name of the repository" name="keyword">
+					<span class="input-group-btn"><button class="btn btn-default" type="submit">Search</button></span>
+				</div>
+				<input type="hidden" name="action" value="search"/>
+			</form>
 
-		<h3>Contributions over time:</h3>
-		<div>
-			<h4>Total changes (additions + deletions):</h4>
-			<div id="totalChangesOvertimeChart"></div>
+			<h3>Committers:</h3>
+			<ul id="committers"></ul>
+			<div id="bestCommittersChart"></div>
 
-			<h4>Total effective changes (additions - deletions):</h4>
-			<div id="totalEffectiveChangesOvertimeChart"></div>
+			<h3>Contributions over time:</h3>
+			<div>
+				<h4>Total changes (additions + deletions):</h4>
+				<div id="totalChangesOvertimeChart"></div>
 
-			<h4>Total commits over time:</h4>
-			<div id="totalCommitsOvertimeChart"></div>
+				<h4>Total effective changes (additions - deletions):</h4>
+				<div id="totalEffectiveChangesOvertimeChart"></div>
+
+				<h4>Total commits over time:</h4>
+				<div id="totalCommitsOvertimeChart"></div>
+			</div>
+
+			<h3>Contributions in aggregate:</h3>
+			<div>
+				<div id="totalCommitsAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
+				<div id="totalChangesAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
+			</div>
+
+			 <h3>Commits:</h3>
+			 <div id="commitsTimelineChart"></div>
+
+			<div>
+				<h3>Commits per day of week:</h3>
+				<div id="commitsPerDayOfWeekChart"></div>
+
+				<h3>Commits per hour of day:</h3>
+				<div id="commitsPerTimeOfDayChart"></div>
+			</div>
 		</div>
-
-		<h3>Contributions in aggregate:</h3>
-		<div>
-			<div id="totalCommitsAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
-			<div id="totalChangesAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
-		</div>
-
-		 <h3>Commits:</h3>
-		 <div id="commitsTimelineChart"></div>
-
-		<div>
-			<h3>Commits per day of week:</h3>
-			<div id="commitsPerDayOfWeekChart"></div>
-
-			<h3>Commits per hour of day:</h3>
-			<div id="commitsPerTimeOfDayChart"></div>
-		</div>
+		<div class="col-md-2"></div>
 
         <script src="js/utils.js"></script>
 		<script src="js/show-repo.js"></script>

@@ -1,20 +1,14 @@
-if (params.action === "search" && params.keyword) search(params.keyword);
+if (params.action === "search" && params.keyword != undefined) search(params.keyword);
 
 function search(keyword) {
-    callGitApi("search/repositories?q=" + keyword, listRepositories);
+    if (keyword) callGitApi("search/repositories?q=" + keyword, listRepositories);
+    else         noResult();
 }
 
 function listRepositories(response) {
-    var results = document.getElementById("searchResults");
-    var addItem = function(child) {
-        var item  = document.createElement("li");
-        item.appendChild(child);
-        results.appendChild(item);
-    }
-
     var repos = response.items;
     if (repos.length == 0) {
-        addItem(document.createTextNode("No result to display"));
+        noResult();
         return;
     }
 
@@ -25,4 +19,18 @@ function listRepositories(response) {
         link.innerHTML = repos[i].full_name;
         addItem(link);
     }
+}
+
+function noResult() { addItem(document.createTextNode("No results to display")); }
+
+function addItem(child) {
+    var item = document.createElement("li");
+    item.appendChild(child);
+
+    var div = document.createElement("div");
+    div.setAttribute("class", "col-md-4");
+    div.appendChild(item);
+
+    var results = document.getElementById("searchResults");
+    results.appendChild(div);
 }

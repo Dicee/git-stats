@@ -2,20 +2,29 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta http-equiv="Content-Language" content="en-us">
+        <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
 	</head>
-	
+
 	<body>
-		Name of the repository:<br>
-		<form method="GET" action="github.html">
-			<input type="hidden" name="action" value="search"/>
-			<input name="keyword" type="text" id="keyword"/>
-			<input type="submit" value="Search"/>
-		</form> 
-		<p id="node"></p>
-		 
-		<ul id="searchResults">
-		</ul>
-		 
+		<div class="col-md-2"></div>
+		<div class="col-md-8">
+			<h1 class=".page-header">git-stats</h1>
+			<form method="GET" action="github.html">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Name of the repository" name="keyword">
+					<span class="input-group-btn"><button class="btn btn-default" type="submit">Search</button></span>
+				</div>
+				<input type="hidden" name="action" value="search"/>
+			</form>
+
+			<p id="node"></p>
+
+			<ul id="searchResults">
+			</ul>
+		</div>
+		<div class="col-md-2"></div>
+
+		<script src="lib/bootstrap-3.3.6-dist/bootstrap.min.js"></script>
 		<script src="js/utils.js"></script>
 		<script src="js/github.js"></script>
 	</body>

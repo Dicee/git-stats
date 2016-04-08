@@ -179,7 +179,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
         var tooltip       = "<ul>" + entry[1].map(function(commit) { return "<li><b>" + commit.date + ":</b> " + commit.message + "</li>"; }).join("") + "</ul>";
         return new Array(committerName, "", tooltip, day, day.plusDays(1));
     }));
-    chart.draw(dataTable, { height: numberOfCommitters * 50 });
+    chart.draw(dataTable, { height: numberOfCommitters * 65 });
 }
 
 function displayPerTimeOfDayStatsChart(commits, committers) {
