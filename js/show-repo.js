@@ -10,39 +10,48 @@ function showRepo(repo) {
     var latestCommits      = [];
 
     consumeCommits(repo, function (commitJSON, eof) {
-        var committer = commitJSON.commit.committer;
+        var commit    = extractBestPossibleCommitInfo(commitJSON);
+        var committer = commit.committer;
         if (!committers.has(committer.name)) {
             var item       = document.createElement("li");
             item.innerHTML = "Name: " + committer.name + ". Contact e-mail: " + committer.email;
             committersList.appendChild(item);
             committers.add(committer.name);
         }
-        generateGitStats(commitJSON, latestCommits, committers, eof);
+
+        //if (latestCommits.length < 100) {
+            latestCommits.push(commit);
+        //
+
+        if (eof) {
+            displayBestCommittersChart   (latestCommits                 );
+            displayCommitsTimelineChart  (latestCommits, committers.size);
+            displayPerDayOfWeekStatsChart(latestCommits, committers     );
+            displayPerTimeOfDayStatsChart(latestCommits, committers     );
+        }
     });
     getContributorsStats(repo, displayContributionsCharts);
 }
 
-function generateGitStats(commitJSON, latestCommits, committers, eof) {
-    var commit    = commitJSON.commit;
-    var committer = commit.committer;
-
-    //if (latestCommits.length < 100) {
-        latestCommits.push({ committerName: committer.name, message: commit.message, date: new Date(committer.date) });
-    //}
-    if (eof) {
-        displayBestCommittersChart(latestCommits);
-
-        displayCommitsTimelineChart  (latestCommits, committers.size);
-        displayPerDayOfWeekStatsChart(latestCommits, committers     );
-        displayPerTimeOfDayStatsChart(latestCommits, committers     );
-    }
+function extractBestPossibleCommitInfo(commitJSON) {
+    var commitNode = commitJSON.commit;
+    var author     = commitNode.author;
+    var committer  = commitNode.committer;
+    return {
+        committer: {
+            name   : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
+            email  : author.email || committer.email
+        },
+        message: commitNode.message,
+        date   : new Date(author.date || committer.date)
+    };
 }
 
 function displayBestCommittersChart(commits) {
     var committersStats = new Map();
     for (let commit of commits) {
-        var existingStat = committersStats.get(commit.committerName);
-        committersStats.set(commit.committerName, (!existingStat ? 0 : existingStat) + 1);
+        var existingStat = committersStats.get(commit.committer.name);
+        committersStats.set(commit.committer.name, (!existingStat ? 0 : existingStat) + 1);
     }
 
     var stats = Array.from(committersStats.entries()).sort(function(x, y) { return y[1] - x[1]; });
@@ -159,7 +168,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
     dataTable.addColumn({ type: 'date', id: 'Date' });
     dataTable.addColumn({ type: 'date', id: 'Date+1' });
 
-    var getKey = function(commit) { return commit.committerName + "," + commit.date.roundToDay().getTime(); }
+    var getKey = function(commit) { return commit.committer.name + "," + commit.date.roundToDay().getTime(); }
 
     // group the commits by author and date
     var commitsByAuthorAndDate = new Map();
@@ -204,7 +213,7 @@ function displayPerDayOfWeekStatsChart(commits, committers) {
 function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, dateToRange, rangeToObj, title, rangeType, rangeTitle, rangeFormat, containerId, minRange, maxRange) {
     var commitsPerTimeRangeAndCommitter = new Array(numberOfRanges);
     for (var i = 0; i < numberOfRanges; i++) commitsPerTimeRangeAndCommitter[i] = new Counter(committers);
-    for (let commit of commits) commitsPerTimeRangeAndCommitter[dateToRange(commit.date)].inc(commit.committerName);
+    for (let commit of commits) commitsPerTimeRangeAndCommitter[dateToRange(commit.date)].inc(commit.committer.name);
 
     var data = [];
     for (var i = 0; i < numberOfRanges; i++) {
