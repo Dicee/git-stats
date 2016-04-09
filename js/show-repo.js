@@ -52,7 +52,6 @@ function displayBestCommittersChart(commits) {
     var chart = new google.charts.Bar(document.getElementById('bestCommittersChart'));
     var options = {
         title: 'Best committers',
-        width: stats.length * 90,
         height: stats.length * 60,
         backgroundColor: { fill:'transparent' },
         legend: { position: 'none' },
@@ -223,7 +222,6 @@ function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, da
         title: title,
         isStacked: true,
         hAxis: { title: rangeTitle, format: rangeFormat },
-        width: 1000,
         height: 500,
         backgroundColor: { fill:'transparent' },
         vAxis: { title: "Number of commits" }

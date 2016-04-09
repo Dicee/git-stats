@@ -10,8 +10,8 @@
 	</head>
 	
 	<body>
-		<div class="col-md-2"></div>
-		<div class="col-md-8">
+		<div class="col-md-1"></div>
+		<div class="col-md-10">
 			<h1 class=".page-header">git-stats</h1>
 			<form method="GET" action="index.html">
 				<div class="input-group">
@@ -37,9 +37,13 @@
 			</div>
 
 			<h3>Contributions in aggregate:</h3>
-			<div>
-				<div id="totalCommitsAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
-				<div id="totalChangesAggregatePieChart" style="width: 700px; height: 450px; display: inline-block;"></div>
+			<div class="row">
+				<div class="col-md-6">
+					<div id="totalCommitsAggregatePieChart" style="height: 450px"></div>
+				</div>
+				<div class="col-md-6">
+					<div id="totalChangesAggregatePieChart" style="height: 450px"></div>
+				</div>
 			</div>
 
 			 <h3>Commits:</h3>
@@ -53,7 +57,7 @@
 				<div id="commitsPerTimeOfDayChart"></div>
 			</div>
 		</div>
-		<div class="col-md-2"></div>
+		<div class="col-md-1"></div>
 
 		<script src="js/utils.js"></script>
         <script src="js/git-api.js"></script>
