@@ -109,7 +109,7 @@ function displayContributionsCharts(contributions) {
 
 function baseDisplayContributionsOvertimeChart(changesOverTime, lastWeekWithData, mapToInt, committers, vAxisTitle, containerId) {
     // aggregate the data
-    var data = Array.from({length: lastWeekWithData}, _ => Array(changesOverTime[0].length).fill(0));
+    var data = Array.from({length: lastWeekWithData + 1}, _ => Array(changesOverTime[0].length).fill(0));
     for (var i = 0; i < data.length; i++) {
         // the first column contains the date field
         data[i][0] = changesOverTime[i][0];
@@ -145,7 +145,7 @@ function baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData
     var data = Array.from({length: committers.length}, _ => Array(2).fill(0));
 
     for (var i = 0; i < data.length; i++) data[i][0] = committers[i];
-    for (var i = 0; i < lastWeekWithData; i++) {
+    for (var i = 0; i <= lastWeekWithData; i++) {
         for (var j = 0; j < data.length; j++) {
             // the first column contains the date, which we don't care about
             data[j][1] += mapToInt(changesOverTime[i][j + 1]);
