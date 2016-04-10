@@ -39,11 +39,33 @@ function Counter(keys) {
     this.keys     = function()    { return Object.keys(this.map); };
     this.values   = function()    {
         var counter = this;
-        return this.keys().map(function (key) { return counter.count(key); })
+        return this.keys().map(function (key) { return counter.count(key); });
     }
     this.entries  = function() {
         var counter = this;
-        return this.keys().map(function (key) { return [ key, counter.count(key) ]; })
+        return this.keys().map(function (key) { return [ key, counter.count(key) ]; });
     };
     this.toString = function() { return JSON.stringify(this.map); };
+}
+
+function RichMap() {
+    var richMap = this;
+
+    this.map = {};
+
+    this.get         = function(key)        { return this.map[key]                ; };
+    this.put         = function(key, value) { this.map[key] = value;              ; };
+    this.containsKey = function(key)        { return this.map.hasOwnProperty(key) ; };
+    this.keys        = function()           { return Object.keys   (this.map)     ; };
+    this.toString    = function()           { return JSON.stringify(this.map)     ; };
+
+    this.entries = function() { return this.keys().map(function (key) { return [ key, richMap.get(key) ]; }); };
+    this.values  = function() { return this.keys().map(function (key) { return        richMap.get(key)  ; }); };
+
+    this.getOrElse   = function(key, fallback) { return this.get(key) === undefined ? fallback : this.get(key); };
+    this.putIfAbsent = function(key, value) {
+        if (this.get(key) !== undefined) return this.get(key);
+        this.put(key, value);
+        return value;
+    };
 }
