@@ -1,7 +1,7 @@
 search(params.keyword);
 
 function search(keyword) {
-    if (keyword) searchRepository(keyword, listRepositories);
+    if (keyword) searchRepository(keyword, listRepositories, onerror);
     else         noResult();
 }
 
