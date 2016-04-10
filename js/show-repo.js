@@ -61,10 +61,10 @@ function displayBestCommittersChart(commits) {
     var chart = new google.charts.Bar(document.getElementById('bestCommittersChart'));
     var options = {
         title: 'Best committers',
-        height: stats.length * 60,
+        height: 30 + stats.length * 40,
         backgroundColor: { fill:'transparent' },
         legend: { position: 'none' },
-        chart: { title: 'Best committers', subtitle: '(by number of commits)' },
+        //chart: { title: 'Best committers', subtitle: '(by number of commits)' },
         bars: 'horizontal',
         axes: {
             x: { 0: { side: 'top', label: 'Commits'} },
@@ -187,7 +187,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
         var tooltip       = "<ul>" + entry[1].map(function(commit) { return "<li><b>" + commit.date + ":</b> " + commit.message + "</li>"; }).join("") + "</ul>";
         return new Array(committerName, "", tooltip, day, day.plusDays(1));
     }));
-    chart.draw(dataTable, { height: numberOfCommitters * 65 });
+    chart.draw(dataTable, { height: 50 + numberOfCommitters * 50 });
 }
 
 function displayPerTimeOfDayStatsChart(commits, committers) {
