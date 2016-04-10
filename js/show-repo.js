@@ -5,6 +5,11 @@ function parseURL() {
 }
 
 function showRepo(repo) {
+    getCommitsStats(repo);
+    getContributorsStats(repo, displayContributionsCharts);
+}
+
+function getCommitsStats(repo) {
     var committers         = new Set();
     var committersList     = document.getElementById("committers");
     var latestCommits      = [];
@@ -24,7 +29,6 @@ function showRepo(repo) {
             displayPerTimeOfDayStatsChart(latestCommits, committers     );
         }
     });
-    getContributorsStats(repo, displayContributionsCharts);
 }
 
 function addToCommittersTable(committer) {
