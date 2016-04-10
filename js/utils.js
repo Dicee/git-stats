@@ -21,6 +21,10 @@ Date.prototype.copy = function() {
     return new Date(this.getTime());
 };
 
+function matrix(n, m, defaultValue) {
+    return Array.from({length: n}, _ => Array(m).fill(defaultValue));
+}
+
 function debug(...args) { console.log(...args.map(function(x) { return x.debug !== undefined ? x.debug() : JSON.stringify(x); })); }
 
 function Counter(keys) {
