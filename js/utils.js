@@ -24,28 +24,22 @@ Date.prototype.copy = function() {
 function debug(...args) { console.log(...args.map(JSON.stringify)); }
 
 function Counter(keys) {
-    this.map = {};
+    this.map = new RichMap();
     if (keys) {
-        for (let key of keys) this.map[key] = 0;
+        for (let key of keys) this.map.put(key, 0);
     }
 
-    this.count = function (key) { return this.map[key] == undefined ? 0 : this.map[key]; };
+    this.count = function (key) { return this.map.getOrElse(key, 0); };
     this.add   = function(key, n) {
         var count = this.count(key) + n;
-        this.map[key] = count;
+        this.map.put(key, count);
         return count;
     }
-    this.inc      = function(key) { return this.add(key, 1); };
-    this.keys     = function()    { return Object.keys(this.map); };
-    this.values   = function()    {
-        var counter = this;
-        return this.keys().map(function (key) { return counter.count(key); });
-    }
-    this.entries  = function() {
-        var counter = this;
-        return this.keys().map(function (key) { return [ key, counter.count(key) ]; });
-    };
-    this.toString = function() { return JSON.stringify(this.map); };
+    this.inc      = function(key) { return this.add(key, 1)   ; };
+    this.keys     = function()    { return this.map.keys    (); };
+    this.values   = function()    { return this.map.values  (); };
+    this.entries  = function()    { return this.map.entries (); };
+    this.toString = function()    { return this.map.toString(); };
 }
 
 function RichMap() {
