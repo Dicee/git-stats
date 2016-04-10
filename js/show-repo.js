@@ -177,7 +177,7 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
         commitsByAuthorAndDate.put(key, userCommits);
     }
 
-    dataTable.addRows(Array.from(commitsByAuthorAndDate.entries()).map(function(entry) {
+    dataTable.addRows(commitsByAuthorAndDate.entries().map(function(entry) {
         var split         = entry[0].split(",");
         var committerName = split[0];
         var day           = new Date(parseInt(split[1]));
@@ -215,7 +215,7 @@ function displayStackedChartPerTimeRange(commits, committers, numberOfRanges, da
     var data = [];
     for (var i = 0; i < numberOfRanges; i++) {
         var statsOfRange = [ rangeToObj(i) ];
-        statsOfRange.push(...Array.from(commitsPerTimeRangeAndCommitter[i].map.values()));
+        statsOfRange.push(...commitsPerTimeRangeAndCommitter[i].map.values());
         data.push(statsOfRange);
     }
 
