@@ -24,16 +24,26 @@ Date.prototype.copy = function() {
 function debug(...args) { console.log(...args.map(JSON.stringify)); }
 
 function Counter(keys) {
-    this.map = new Map();
+    this.map = {};
     if (keys) {
-        for (let key of keys) this.map.set(key, 0);
+        for (let key of keys) this.map[key] = 0;
     }
 
-    this.count = function (key) { return this.map.get(key) == undefined ? 0 : this.map.get(key); };
+    this.count = function (key) { return this.map[key] == undefined ? 0 : this.map[key]; };
     this.add   = function(key, n) {
         var count = this.count(key) + n;
-        this.map.set(key, count);
+        this.map[key] = count;
         return count;
     }
-    this.inc = function(key) { return this.add(key, 1); }
+    this.inc      = function(key) { return this.add(key, 1); };
+    this.keys     = function()    { return Object.keys(this.map); };
+    this.values   = function()    {
+        var counter = this;
+        return this.keys().map(function (key) { return counter.count(key); })
+    }
+    this.entries  = function() {
+        var counter = this;
+        return this.keys().map(function (key) { return [ key, counter.count(key) ]; })
+    };
+    this.toString = function() { return JSON.stringify(this.map); };
 }
