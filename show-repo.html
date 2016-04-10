@@ -35,7 +35,18 @@
 			</div>
 
 			<h3 id="committers-overview">Committers overview:</h3>
-			<ul id="committers"></ul>
+			<table id="committers" class="table table-hover">
+				<thead>
+				<tr>
+					<th>Avatar</th>
+					<th>Login/Name</th>
+					<th>Github account</th>
+					<th>E-mail</th>
+				</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
 
 			<h4>Best committers</h4>
 			<h5 class="subtitle">(by number of commits)</h5>
@@ -84,6 +95,7 @@
 		<div class="col-md-1"></div>
 
 		<script src="js/utils.js"></script>
+		<script src="js/dom-utils.js"></script>
         <script src="js/git-api.js"></script>
 		<script src="js/show-repo.js"></script>
 	</body>

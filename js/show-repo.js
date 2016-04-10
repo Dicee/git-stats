@@ -13,9 +13,7 @@ function showRepo(repo) {
         var commit    = extractBestPossibleCommitInfo(commitJSON);
         var committer = commit.committer;
         if (!committers.has(committer.name)) {
-            var item       = document.createElement("li");
-            item.innerHTML = "Name: " + committer.name + ". Contact e-mail: " + committer.email;
-            committersList.appendChild(item);
+            addToCommittersTable(committer);
             committers.add(committer.name);
         }
 
@@ -39,12 +37,31 @@ function extractBestPossibleCommitInfo(commitJSON) {
     var committer  = commitNode.committer;
     return {
         committer: {
-            name   : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
-            email  : author.email || committer.email
+            name      : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
+            email     : author.email || committer.email,
+            html_url  : (commitJSON.author && commitJSON.author.html_url) || (commitJSON.committer && commitJSON.committer.html_url),
+            avatar_url: (commitJSON.author && commitJSON.author.avatar_url) || (commitJSON.committer && commitJSON.committer.avatar_url)
         },
         message: commitNode.message,
         date   : new Date(author.date || committer.date)
     };
+}
+
+function addToCommittersTable(committer) {
+    var recognized = committer.html_url && committer.avatar_url;
+
+    var th  = container("th", { scope: "row" }, recognized ? img(committer.avatar_url, { class: "small-img" }) : text(""));
+    var td1 = simpleContainer("td", text(committer.name));
+    var td2 = simpleContainer("td", recognized ? link(committer.html_url, "Link", { target: "_blank" }) : text("Unrecognized"));
+    var td3 = simpleContainer("td");
+    // cannot create a TextNode with a string containing an @...
+    td3.innerHTML = committer.email;
+
+    var tr = simpleContainer("tr", th, td1, td2, td3);
+    if (!recognized) tr.setAttribute("class", "danger");
+
+    var committersBody = document.getElementById("committers").tBodies[0];
+    committersBody.appendChild(tr);
 }
 
 function displayBestCommittersChart(commits) {
