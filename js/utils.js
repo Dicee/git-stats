@@ -21,7 +21,7 @@ Date.prototype.copy = function() {
     return new Date(this.getTime());
 };
 
-function debug(anything) { console.log(JSON.stringify(anything)); }
+function debug(...args) { console.log(...args.map(JSON.stringify)); }
 
 function Counter(keys) {
     this.map = new Map();
