@@ -21,7 +21,7 @@ Date.prototype.copy = function() {
     return new Date(this.getTime());
 };
 
-function debug(...args) { console.log(...args.map(JSON.stringify)); }
+function debug(...args) { console.log(...args.map(function(x) { return x.debug !== undefined ? x.debug() : JSON.stringify(x); })); }
 
 function Counter(keys) {
     this.map = new RichMap();
@@ -40,6 +40,7 @@ function Counter(keys) {
     this.values   = function()    { return this.map.values  (); };
     this.entries  = function()    { return this.map.entries (); };
     this.toString = function()    { return this.map.toString(); };
+    this.debug    = function()    { return this    .toString(); };
 }
 
 function RichMap() {
@@ -52,6 +53,7 @@ function RichMap() {
     this.containsKey = function(key)        { return this.map.hasOwnProperty(key) ; };
     this.keys        = function()           { return Object.keys   (this.map)     ; };
     this.toString    = function()           { return JSON.stringify(this.map)     ; };
+    this.debug       = function()           { return this.toString()              ; };
 
     this.entries = function() { return this.keys().map(function (key) { return [ key, richMap.get(key) ]; }); };
     this.values  = function() { return this.keys().map(function (key) { return        richMap.get(key)  ; }); };
