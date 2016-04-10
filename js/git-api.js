@@ -12,13 +12,13 @@ function consumeCommitsRec(repo, pageIndex, commitConsumer, onerror, limit) {
     getCommitsPage(repo, pageIndex, function(commits, eof) {
         for (var i = 0; i < commits.length; i++) commitConsumer(extractBestPossibleCommitInfo(commits[i]), eof && i == commits.length - 1);
         if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer, onerror, limit);
-    }, onerror);
+    }, onerror, limit);
 }
 
-function getCommitsPage(repo, pageIndex, callback, onerror) {
+function getCommitsPage(repo, pageIndex, callback, onerror, limit) {
     var expectedCommits = 100;
     callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
-        callback(commits, commits.length < expectedCommits);
+        callback(commits, commits.length < expectedCommits || pageIndex == limit);
     });
 }
 
