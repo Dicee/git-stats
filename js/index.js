@@ -17,20 +17,21 @@ function listRepositories(response) {
         link.href      = "show-repo.html?repo=" + repos[i].full_name;
         link.alt       = "See repository " + repos[i].full_name;
         link.innerHTML = repos[i].full_name;
-        addItem(link);
+        addItem(link, repos.length, i);
     }
 }
 
-function noResult() { addItem(document.createTextNode("No results to display")); }
+function noResult() { addItem(document.createTextNode("No results to display"), 1, 0); }
 
-function addItem(child) {
+function addItem(child, numberOfItems, index) {
     var item = document.createElement("li");
     item.appendChild(child);
 
     var div = document.createElement("div");
-    div.setAttribute("class", "col-md-4");
     div.appendChild(item);
 
-    var results = document.getElementById("searchResults");
+    var numberOfLists = 3;
+    var assignedList  = parseInt(index * numberOfLists / numberOfItems);
+    var results       = document.getElementById("searchResults-" + assignedList);
     results.appendChild(div);
 }
