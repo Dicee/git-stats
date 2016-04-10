@@ -3,16 +3,16 @@ function searchRepository(keyword, callback, onerror) {
     callGitApi("search/repositories?q=" + keyword.trim().replace(keywordNormalizeRegex, "+"), callback, onerror);
 }
 
-function consumeCommits(repo, commitConsumer, limit) {
-    consumeCommitsRec(repo, 1, commitConsumer, limit == undefined ? Number.MAX_SAFE_INTEGER : limit);
+function consumeCommits(repo, commitConsumer, onerror, limit = 10) {
+    consumeCommitsRec(repo, 1, commitConsumer, onerror, limit);
 }
 
-function consumeCommitsRec(repo, pageIndex, commitConsumer, limit) {
+function consumeCommitsRec(repo, pageIndex, commitConsumer, onerror, limit) {
     if (pageIndex > limit) return;
     getCommitsPage(repo, pageIndex, function(commits, eof) {
-        for (var i = 0; i < commits.length; i++) commitConsumer(commits[i], eof && i == commits.length - 1);
-        if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer);
-    });
+        for (var i = 0; i < commits.length; i++) commitConsumer(extractBestPossibleCommitInfo(commits[i]), eof && i == commits.length - 1);
+        if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer, onerror, limit);
+    }, onerror);
 }
 
 function getCommitsPage(repo, pageIndex, callback, onerror) {
@@ -20,6 +20,22 @@ function getCommitsPage(repo, pageIndex, callback, onerror) {
     callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
         callback(commits, commits.length < expectedCommits);
     });
+}
+
+function extractBestPossibleCommitInfo(commitJSON) {
+    var commitNode = commitJSON.commit;
+    var author     = commitNode.author;
+    var committer  = commitNode.committer;
+    return {
+        committer: {
+            name      : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
+            email     : author.email || committer.email,
+            html_url  : (commitJSON.author && commitJSON.author.html_url) || (commitJSON.committer && commitJSON.committer.html_url),
+            avatar_url: (commitJSON.author && commitJSON.author.avatar_url) || (commitJSON.committer && commitJSON.committer.avatar_url)
+        },
+        message: commitNode.message,
+        date   : new Date(author.date || committer.date)
+    };
 }
 
 function getContributorsStats(repo, callback, onerror) {

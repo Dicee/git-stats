@@ -9,17 +9,13 @@ function showRepo(repo) {
     var committersList     = document.getElementById("committers");
     var latestCommits      = [];
 
-    consumeCommits(repo, function (commitJSON, eof) {
-        var commit    = extractBestPossibleCommitInfo(commitJSON);
+    consumeCommits(repo, function (commit, eof) {
         var committer = commit.committer;
         if (!committers.has(committer.name)) {
             addToCommittersTable(committer);
             committers.add(committer.name);
         }
-
-        //if (latestCommits.length < 100) {
-            latestCommits.push(commit);
-        //
+        latestCommits.push(commit);
 
         if (eof) {
             displayBestCommittersChart   (latestCommits                 );
@@ -29,22 +25,6 @@ function showRepo(repo) {
         }
     });
     getContributorsStats(repo, displayContributionsCharts);
-}
-
-function extractBestPossibleCommitInfo(commitJSON) {
-    var commitNode = commitJSON.commit;
-    var author     = commitNode.author;
-    var committer  = commitNode.committer;
-    return {
-        committer: {
-            name      : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
-            email     : author.email || committer.email,
-            html_url  : (commitJSON.author && commitJSON.author.html_url) || (commitJSON.committer && commitJSON.committer.html_url),
-            avatar_url: (commitJSON.author && commitJSON.author.avatar_url) || (commitJSON.committer && commitJSON.committer.avatar_url)
-        },
-        message: commitNode.message,
-        date   : new Date(author.date || committer.date)
-    };
 }
 
 function addToCommittersTable(committer) {
