@@ -48,13 +48,10 @@ function extractBestPossibleCommitInfo(commitJSON) {
 }
 
 function displayBestCommittersChart(commits) {
-    var committersStats = new Map();
-    for (let commit of commits) {
-        var existingStat = committersStats.get(commit.committer.name);
-        committersStats.set(commit.committer.name, (!existingStat ? 0 : existingStat) + 1);
-    }
+    var counter = new Counter();
+    for (let commit of commits) counter.inc(commit.committer.name);
 
-    var stats = Array.from(committersStats.entries()).sort(function(x, y) { return y[1] - x[1]; });
+    var stats = counter.entries().sort(function(x, y) { return y[1] - x[1]; });
     stats.unshift(new Array("Committer", "Commits"));
 
     var data = new google.visualization.arrayToDataTable(stats);
@@ -171,13 +168,12 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
     var getKey = function(commit) { return commit.committer.name + "," + commit.date.roundToDay().getTime(); }
 
     // group the commits by author and date
-    var commitsByAuthorAndDate = new Map();
+    var commitsByAuthorAndDate = new RichMap();
     for (let commit of commits) {
-        var key           = getKey(commit);
-        var existingValue = commitsByAuthorAndDate.get(key);
-        var newValue      = !existingValue ? [ ] : existingValue;
-        newValue.push(commit);
-        commitsByAuthorAndDate.set(key, newValue);
+        var key         = getKey(commit);
+        var userCommits = commitsByAuthorAndDate.getOrElse(key, []);
+        userCommits.push(commit);
+        commitsByAuthorAndDate.put(key, userCommits);
     }
 
     dataTable.addRows(Array.from(commitsByAuthorAndDate.entries()).map(function(entry) {
