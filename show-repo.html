@@ -23,14 +23,26 @@
 
 			<div id="alerts"></div>
 
-			<h3>Committers:</h3>
+			<div id="summary">
+				<h3>Summary</h3>
+				<ul>
+					<li><a href="#committers-overview">Committers overview</a></li>
+					<li><a href="#contributions-overtime">Contributions overtime</a></li>
+					<li><a href="#contributions-aggregate">Contributions in aggregate</a></li>
+					<li><a href="#commits-timeline">Commits' timeline</a></li>
+					<li><a href="#commits-distribution">Commits' distribution</a></li>
+				</ul>
+			</div>
+
+			<h3 id="committers-overview">Committers overview:</h3>
 			<ul id="committers"></ul>
 
 			<h4>Best committers</h4>
 			<h5 class="subtitle">(by number of commits)</h5>
 			<div id="bestCommittersChart"></div>
+			<a href="#summary">Back to the top</a>
 
-			<h3>Contributions over time:</h3>
+			<h3 id="contributions-overtime">Contributions over time:</h3>
 			<div>
 				<h4>Total changes (additions + deletions):</h4>
 				<div id="totalChangesOvertimeChart"></div>
@@ -41,8 +53,9 @@
 				<h4>Total commits over time:</h4>
 				<div id="totalCommitsOvertimeChart"></div>
 			</div>
+			<a href="#summary">Back to the top</a>
 
-			<h3>Contributions in aggregate:</h3>
+			<h3 id="contributions-aggregate">Contributions in aggregate:</h3>
 			<div class="row">
 				<div class="col-md-6">
 					<div id="totalCommitsAggregatePieChart" style="height: 450px"></div>
@@ -51,18 +64,23 @@
 					<div id="totalChangesAggregatePieChart" style="height: 450px"></div>
 				</div>
 			</div>
+			<a href="#summary">Back to the top</a>
 
-			 <h3>Commits:</h3>
-			 <div id="commitsTimelineChart"></div>
+			<h3 id="commits-timeline">Commits' timeline:</h3>
+			<div id="commitsTimelineChart"></div>
+			<a href="#summary">Back to the top</a>
 
+			<h3 id="commits-distribution">Commits' distribution:</h3>
 			<div>
-				<h3>Commits per day of week:</h3>
+				<h4>Commits per day of week:</h4>
 				<div id="commitsPerDayOfWeekChart"></div>
 
-				<h3>Commits per hour of day:</h3>
+				<h4>Commits per hour of day:</h4>
 				<div id="commitsPerTimeOfDayChart"></div>
 			</div>
+			<a href="#summary">Back to the top</a>
 		</div>
+
 		<div class="col-md-1"></div>
 
 		<script src="js/utils.js"></script>
