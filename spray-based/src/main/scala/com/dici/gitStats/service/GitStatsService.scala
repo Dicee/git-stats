@@ -65,7 +65,7 @@ class GitStatsServiceActor extends Actor with GitStatsService {
 trait GitStatsService extends HttpService {
   val ROOT  = "git-stats"
   val route =
-  (path(ROOT / "commits" / "[^/]+".r / "[^/]+".r) & get) { (owner, repo) =>
+  (path(ROOT / "[^/]+".r / "[^/]+".r / "commits") & get) { (owner, repo) =>
     complete {
       getCommits(owner + "/" + repo).map(commits => DefaultJsonProtocol.listFormat[Commit].write(commits).prettyPrint)
     }
