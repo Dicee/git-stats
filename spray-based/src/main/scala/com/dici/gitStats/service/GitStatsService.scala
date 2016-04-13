@@ -36,8 +36,8 @@ class GitStatsServiceActor extends Actor with GitStatsService {
 
     val name          = authorNode   .getOptionalString("login"     ).orElse(authorNode.getOptionalString("name")).getOrElse("Unrecognized")
     val email         = committerNode.getAsString      ("email"     )
-    val htmlUrl       = authorNode   .getOptionalString("html_url"  ).getOrElse("")
-    val avatarUrl     = authorNode   .getOptionalString("avatar_url").getOrElse("")
+    val htmlUrl       = authorNode   .getOptionalString("html_url"  ).orNull
+    val avatarUrl     = authorNode   .getOptionalString("avatar_url").orNull
 
     Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), committerNode.getAsString("date"))
   }
@@ -45,11 +45,13 @@ class GitStatsServiceActor extends Actor with GitStatsService {
   implicit class JsValueToJsObject(value: JsValue) {
     private val node = value.asJsObject
 
-    def getAsJsObject(key: String) = getOptionalJsObject(key).get
-    def getOptionalJsObject(key: String) = node.fields.get(key).map(_.asJsObject)
+    def getAsJsObject      (key: String) = getOptionalJsObject(key).get
+    def getOptionalJsObject(key: String) = getNonNullOptional (key).map(_.asJsObject)
 
-    def getAsString(key: String) = getOptionalString(key).get
-    def getOptionalString(key: String) = node.fields.get(key).map { case JsString(s) => s }
+    def getAsString      (key: String) = getOptionalString (key).get
+    def getOptionalString(key: String) = getNonNullOptional(key).map { case JsString(s) => s }
+
+    private def getNonNullOptional(key: String) = node.fields.get(key).filter(_ != JsNull)
   }
 
   private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com/" + endPoint)).mapTo[HttpResponse]
