@@ -23,23 +23,28 @@ class GitStatsServiceActor extends Actor with GitStatsService {
   implicit val system = context.system
   def receive         = runRoute(route)
 
-  protected override def getCommits(repo: String) = {
+  protected override def getCommits(repo: String): Future[List[Commit]] = {
     gitApiCall("repos/" + repo + "/commits")
       .map(_.entity.asString.parseJson.asInstanceOf[JsArray])
       .map(jsonArray => jsonArray.elements.map(extractBestPossibleCommitInfo).toList)
+      .fallbackTo(Future(Nil))
   }
 
   private def extractBestPossibleCommitInfo(value: JsValue) = {
-    val commitNode    = value.getAsJsObject("commit")
-    val authorNode    = value.getOptionalJsObject("author").getOrElse(commitNode.getAsJsObject("author"))
-    val committerNode = value.getAsJsObject("commit").getAsJsObject("committer")
+    try {
+      val commitNode    = value.getAsJsObject("commit")
+      val authorNode    = value.getOptionalJsObject("author").getOrElse(commitNode.getAsJsObject("author"))
+      val committerNode = value.getAsJsObject("commit").getAsJsObject("committer")
 
-    val name          = authorNode   .getOptionalString("login"     ).orElse(authorNode.getOptionalString("name")).getOrElse("Unrecognized")
-    val email         = committerNode.getAsString      ("email"     )
-    val htmlUrl       = authorNode   .getOptionalString("html_url"  ).orNull
-    val avatarUrl     = authorNode   .getOptionalString("avatar_url").orNull
+      val name          = authorNode   .getOptionalString("login"     ).orElse(authorNode.getOptionalString("name")).getOrElse("Unrecognized")
+      val email         = committerNode.getAsString      ("email"     )
+      val htmlUrl       = authorNode   .getOptionalString("html_url"  ).getOrElse("")
+      val avatarUrl     = authorNode   .getOptionalString("avatar_url").getOrElse("")
 
-    Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), committerNode.getAsString("date"))
+      Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), committerNode.getAsString("date"))
+    } catch {
+      case t: Throwable => println(value.prettyPrint); throw t
+    }
   }
 
   implicit class JsValueToJsObject(value: JsValue) {
@@ -60,11 +65,9 @@ class GitStatsServiceActor extends Actor with GitStatsService {
 trait GitStatsService extends HttpService {
   val ROOT  = "git-stats"
   val route =
-  (path(ROOT / "commits") & get) {
-    parameter("repo") { repo =>
-      complete {
-        getCommits(repo).map(commits => DefaultJsonProtocol.listFormat[Commit].write(commits).prettyPrint)
-      }
+  (path(ROOT / "commits" / "[^/]+".r / "[^/]+".r) & get) { (owner, repo) =>
+    complete {
+      getCommits(owner + "/" + repo).map(commits => DefaultJsonProtocol.listFormat[Commit].write(commits).prettyPrint)
     }
   }
 
