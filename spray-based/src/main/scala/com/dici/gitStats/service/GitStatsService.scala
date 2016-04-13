@@ -66,6 +66,5 @@ trait GitStatsService extends HttpService {
     }
   }
 
-  private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com" + endPoint)).mapTo[HttpResponse]
   protected def getCommits(repo: String): Future[List[Commit]]
 }
