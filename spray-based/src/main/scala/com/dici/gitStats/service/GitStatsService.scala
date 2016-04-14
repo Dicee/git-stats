@@ -2,21 +2,19 @@ package com.dici.gitStats.service
 
 import akka.actor.Actor
 import akka.io.IO
-import com.dici.gitStats.data.{Commit, GitStatsJsonProtocol, Committer}
+import akka.pattern.ask
+import com.dici.gitStats.Boot._
+import com.dici.gitStats.Boot.system.dispatcher
+import com.dici.gitStats._
+import com.dici.gitStats.data.GitStatsJsonProtocol._
+import com.dici.gitStats.data.{Commit, Committer}
 import spray.can.Http
 import spray.http.HttpResponse
-import spray.http.MediaTypes._
-import spray.routing._
-import spray.httpx.SprayJsonSupport._
-
 import spray.httpx.RequestBuilding._
-import akka.pattern.ask
-import scala.concurrent.Future
-import scala.util.Success
-import com.dici.gitStats.Boot._
-import system.dispatcher
 import spray.json._
-import com.dici.gitStats.data.GitStatsJsonProtocol._
+import spray.routing._
+
+import scala.concurrent.Future
 
 class GitStatsServiceActor extends Actor with GitStatsService {
   def actorRefFactory = context
@@ -45,18 +43,6 @@ class GitStatsServiceActor extends Actor with GitStatsService {
     } catch {
       case t: Throwable => println(value.prettyPrint); throw t
     }
-  }
-
-  implicit class JsValueToJsObject(value: JsValue) {
-    private val node = value.asJsObject
-
-    def getAsJsObject      (key: String) = getOptionalJsObject(key).get
-    def getOptionalJsObject(key: String) = getNonNullOptional (key).map(_.asJsObject)
-
-    def getAsString      (key: String) = getOptionalString (key).get
-    def getOptionalString(key: String) = getNonNullOptional(key).map { case JsString(s) => s }
-
-    private def getNonNullOptional(key: String) = node.fields.get(key).filter(_ != JsNull)
   }
 
   private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com/" + endPoint)).mapTo[HttpResponse]
