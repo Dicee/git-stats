@@ -5,9 +5,9 @@ import akka.io.IO
 import akka.pattern.ask
 import com.dici.gitStats.Boot._
 import com.dici.gitStats.Boot.system.dispatcher
-import com.dici.gitStats._
+import com.dici.gitStats.data.Commit
 import com.dici.gitStats.data.GitStatsJsonProtocol._
-import com.dici.gitStats.data.{Commit, Committer}
+import com.dici.gitStats.data.mappers.RawCommitsMapper
 import spray.can.Http
 import spray.http.HttpResponse
 import spray.httpx.RequestBuilding._
@@ -16,34 +16,17 @@ import spray.routing._
 
 import scala.concurrent.Future
 
+object GitStatsServiceActor {
+  private val RAW_COMMITS_MAPPER = new RawCommitsMapper
+}
+
 class GitStatsServiceActor extends Actor with GitStatsService {
   def actorRefFactory = context
   implicit val system = context.system
   def receive         = runRoute(route)
 
-  protected override def getCommits(repo: String): Future[List[Commit]] = {
-    gitApiCall("repos/" + repo + "/commits")
-      .map(_.entity.asString.parseJson.asInstanceOf[JsArray])
-      .map(jsonArray => jsonArray.elements.map(extractBestPossibleCommitInfo).toList)
-      .fallbackTo(Future(Nil))
-  }
-
-  private def extractBestPossibleCommitInfo(value: JsValue) = {
-    try {
-      val commitNode    = value.getAsJsObject("commit")
-      val authorNode    = value.getOptionalJsObject("author").getOrElse(commitNode.getAsJsObject("author"))
-      val committerNode = value.getAsJsObject("commit").getAsJsObject("committer")
-
-      val name          = authorNode   .getOptionalString("login"     ).orElse(authorNode.getOptionalString("name")).getOrElse("Unrecognized")
-      val email         = committerNode.getAsString      ("email"     )
-      val htmlUrl       = authorNode   .getOptionalString("html_url"  ).getOrElse("")
-      val avatarUrl     = authorNode   .getOptionalString("avatar_url").getOrElse("")
-
-      Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), committerNode.getAsString("date"))
-    } catch {
-      case t: Throwable => println(value.prettyPrint); throw t
-    }
-  }
+  override def getCommits(repo: String): Future[List[Commit]] =
+    gitApiCall("repos/" + repo + "/commits") >>: GitStatsServiceActor.RAW_COMMITS_MAPPER
 
   private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com/" + endPoint)).mapTo[HttpResponse]
 }
