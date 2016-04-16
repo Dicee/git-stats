@@ -1,6 +1,8 @@
 package com.dici.gitStats.data.mappers
 
 import com.dici.gitStats.data.{Committer, Commit}
+import com.dici.gitStats.data.GitStatsJsonProtocol.DATE_FORMAT
+import org.joda.time.DateTime
 import spray.http.HttpResponse
 import spray.json._
 
@@ -24,8 +26,9 @@ class RawCommitsMapper extends DataMapper[HttpResponse, List[Commit]] {
       val email         = committerNode.getAsString      ("email"     )
       val htmlUrl       = authorNode   .getOptionalString("html_url"  ).getOrElse("")
       val avatarUrl     = authorNode   .getOptionalString("avatar_url").getOrElse("")
+      val date          = DATE_FORMAT.parseDateTime(committerNode.getAsString("date"))
 
-      Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), committerNode.getAsString("date"))
+      Commit(Committer(name, email, htmlUrl, avatarUrl), commitNode.getAsString("message"), date)
     } catch {
       case t: Throwable => println(value.prettyPrint); throw t
     }
