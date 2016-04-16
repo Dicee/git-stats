@@ -2,6 +2,8 @@ package com.dici
 
 import spray.json.{JsNull, JsString, JsValue}
 
+import scala.collection.MapLike
+
 package object gitStats {
   implicit class JsValueToJsObject(value: JsValue) {
     private val node = value.asJsObject
@@ -13,5 +15,15 @@ package object gitStats {
     def getOptionalString(key: String) = getNonNullOptional(key).map { case JsString(s) => s }
 
     private def getNonNullOptional(key: String) = node.fields.get(key).filter(_ != JsNull)
+  }
+
+  // TODO: get rid of this diplication
+  implicit class AugmentedMutableMap[K, V](map: scala.collection.mutable.HashMap[K, V]) {
+    def mapKeys[KR](f: K => KR) = map.map { case (k, v) => (f(k), v) }.toMap
+  }
+
+  // TODO: get rid of this diplication
+  implicit class AugmentedImmutableMap[K, V](map: Map[K, V]) {
+    def mapKeys[KR](f: K => KR) = map.map { case (k, v) => (f(k), v) }.toMap
   }
 }

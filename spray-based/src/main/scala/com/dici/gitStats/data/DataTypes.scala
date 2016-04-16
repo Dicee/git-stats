@@ -11,7 +11,9 @@ final case class IngestedCommits(
     committers: List[Committer],
     commits: List[Commit],
     commitsCount: List[(String, Int)],
-    commitsByCommitterAndDate: Map[String, List[Commit]]
+    commitsByCommitterAndDate: Map[String, List[Commit]],
+    commitsPerHourOfDay: Map[String, Map[String, Int]],
+    commitsPerDayOfWeek: Map[String, Map[String, Int]]
 )
 
 object GitStatsJsonProtocol extends DefaultJsonProtocol {
@@ -24,5 +26,5 @@ object GitStatsJsonProtocol extends DefaultJsonProtocol {
 
   implicit val committerFormat       = jsonFormat4(Committer)
   implicit val commitFormat          = jsonFormat3(Commit)
-  implicit val ingestedCommitsFormat = jsonFormat4(IngestedCommits)
+  implicit val ingestedCommitsFormat = jsonFormat6(IngestedCommits)
 }
