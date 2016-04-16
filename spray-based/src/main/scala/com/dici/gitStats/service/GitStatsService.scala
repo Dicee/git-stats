@@ -28,7 +28,7 @@ class GitStatsServiceActor extends Actor with GitStatsService {
   def receive         = runRoute(route)
 
   override def getCommits(repo: String): Future[List[Commit]] =
-    gitApiCall("repos/" + repo + "/commits") >>: GitStatsServiceActor.RAW_COMMITS_MAPPER
+    gitApiCall("repos/" + repo + "/commits?per_page=100") >>: GitStatsServiceActor.RAW_COMMITS_MAPPER
 
   override def getIngestedCommits(repo: String) = getCommits(repo) >>: new CommitsIngestor
   private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com/" + endPoint)).mapTo[HttpResponse]
