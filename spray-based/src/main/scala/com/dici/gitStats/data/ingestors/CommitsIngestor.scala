@@ -1,6 +1,7 @@
 package com.dici.gitStats.data.ingestors
 
 import com.dici.collection.mutable.Counter
+import com.dici.gitStats.data.ingestors.CommitsIngestor.ROUND_TO_DAY_FORMAT
 import com.dici.gitStats.data.{IngestedCommits, Commit, Committer}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -21,9 +22,14 @@ class CommitsIngestor extends DataIngestor[Commit, IngestedCommits] {
 
   override def result = IngestedCommits(committersDedupedByProfileAndName.values.toList,
                                         commitsCount.toMap.toArray.sortBy(- _._2).toList,
-                                        commits.toList.groupBy(commit => commit.committer.name + "," + CommitsIngestor.roundToDay(commit.date)),
+                                        commitsTimelineByCommitter,
                                         commitsPerHourOfDay,
                                         commitsPerDayOfWeek)
+
+  private lazy val commitsTimelineByCommitter = {
+    commits.groupBy(commit => commit.committer.name)
+           .mapValues(commits => commits.groupBy(commit => ROUND_TO_DAY_FORMAT.print(commit.date.withTimeAtStartOfDay())).mapValues(_.toList))
+  }
 
   private lazy val commitsPerHourOfDay = commitsClassifiedPerCommitterAndTimeRange(date => date.getHourOfDay, "%02d:00".format(_))
 
@@ -34,7 +40,6 @@ class CommitsIngestor extends DataIngestor[Commit, IngestedCommits] {
 
   private def commitsClassifiedPerCommitterAndTimeRange(dateToRange: DateTime => Int, rangeToLabel: Int => String) =
     commits.groupBy(commit => dateToRange(commit.date)).mapValues(_.groupBy(_.committer.name).mapValues(_.size)).mapKeys(rangeToLabel)
-
 }
 
 object CommitsIngestor {

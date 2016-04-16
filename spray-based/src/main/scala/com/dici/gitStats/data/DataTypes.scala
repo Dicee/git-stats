@@ -10,7 +10,7 @@ final case class Commit(committer: Committer, message: String, date: DateTime)
 final case class IngestedCommits(
     committers: List[Committer],
     commitsCount: List[(String, Int)],
-    commitsByCommitterAndDate: Map[String, List[Commit]],
+    commitsTimelineByCommitter: Map[String, Map[String, List[Commit]]],
     commitsPerHourOfDay: Map[String, Map[String, Int]],
     commitsPerDayOfWeek: Map[String, Map[String, Int]]
 )
