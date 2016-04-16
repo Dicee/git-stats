@@ -20,7 +20,6 @@ class CommitsIngestor extends DataIngestor[Commit, IngestedCommits] {
   }
 
   override def result = IngestedCommits(committersDedupedByProfileAndName.values.toList,
-                                        commits.toList,
                                         commitsCount.toMap.toArray.sortBy(- _._2).toList,
                                         commits.toList.groupBy(commit => commit.committer.name + "," + CommitsIngestor.roundToDay(commit.date)),
                                         commitsPerHourOfDay,

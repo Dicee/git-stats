@@ -9,7 +9,6 @@ final case class Committer(name: String, email: String, html_url: String, avatar
 final case class Commit(committer: Committer, message: String, date: DateTime)
 final case class IngestedCommits(
     committers: List[Committer],
-    commits: List[Commit],
     commitsCount: List[(String, Int)],
     commitsByCommitterAndDate: Map[String, List[Commit]],
     commitsPerHourOfDay: Map[String, Map[String, Int]],
@@ -26,5 +25,5 @@ object GitStatsJsonProtocol extends DefaultJsonProtocol {
 
   implicit val committerFormat       = jsonFormat4(Committer)
   implicit val commitFormat          = jsonFormat3(Commit)
-  implicit val ingestedCommitsFormat = jsonFormat6(IngestedCommits)
+  implicit val ingestedCommitsFormat = jsonFormat5(IngestedCommits)
 }
