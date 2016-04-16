@@ -6,11 +6,13 @@ import spray.json._
 
 
 final case class Committer(name: String, email: String, html_url: String, avatar_url: String)
+// TODO: eliminate this duplication without degrading the conciseness of the serialization code too much
+final case class CommitInfo(message: String, date: DateTime)
 final case class Commit(committer: Committer, message: String, date: DateTime)
 final case class IngestedCommits(
     committers: List[Committer],
     commitsCount: List[(String, Int)],
-    commitsTimelineByCommitter: Map[String, Map[String, List[Commit]]],
+    commitsTimelineByCommitter: Map[String, Map[String, List[CommitInfo]]],
     commitsPerHourOfDay: Map[String, Map[String, Int]],
     commitsPerDayOfWeek: Map[String, Map[String, Int]]
 )
@@ -24,6 +26,7 @@ object GitStatsJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit val committerFormat       = jsonFormat4(Committer)
+  implicit val commitInfoFormat      = jsonFormat2(CommitInfo)
   implicit val commitFormat          = jsonFormat3(Commit)
   implicit val ingestedCommitsFormat = jsonFormat5(IngestedCommits)
 }

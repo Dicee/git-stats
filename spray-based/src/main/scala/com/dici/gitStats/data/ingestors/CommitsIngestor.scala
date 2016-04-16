@@ -2,7 +2,7 @@ package com.dici.gitStats.data.ingestors
 
 import com.dici.collection.mutable.Counter
 import com.dici.gitStats.data.ingestors.CommitsIngestor.ROUND_TO_DAY_FORMAT
-import com.dici.gitStats.data.{IngestedCommits, Commit, Committer}
+import com.dici.gitStats.data.{CommitInfo, IngestedCommits, Commit, Committer}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import scala.collection.mutable.{ HashMap => MHashMap, ListBuffer }
@@ -28,7 +28,8 @@ class CommitsIngestor extends DataIngestor[Commit, IngestedCommits] {
 
   private lazy val commitsTimelineByCommitter = {
     commits.groupBy(commit => commit.committer.name)
-           .mapValues(commits => commits.groupBy(commit => ROUND_TO_DAY_FORMAT.print(commit.date.withTimeAtStartOfDay())).mapValues(_.toList))
+           .mapValues(commits => commits.groupBy(commit => ROUND_TO_DAY_FORMAT.print(commit.date.withTimeAtStartOfDay()))
+                                        .mapValues(_.toList.map(commit => CommitInfo(commit.message, commit.date))))
   }
 
   private lazy val commitsPerHourOfDay = commitsClassifiedPerCommitterAndTimeRange(date => date.getHourOfDay, "%02d:00".format(_))
