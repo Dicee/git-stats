@@ -9,6 +9,7 @@ import com.dici.gitStats.data.GitStatsJsonProtocol._
 import com.dici.gitStats.data.ingestors.CommitsIngestor
 import com.dici.gitStats.data.mappers.RawCommitsMapper
 import com.dici.gitStats.data.{Commit, IngestedCommits}
+import com.dici.gitStats.service.Pages._
 import spray.can.Http
 import spray.http.HttpResponse
 import spray.httpx.RequestBuilding._
@@ -35,9 +36,11 @@ class GitStatsServiceActor extends Actor with GitStatsService {
 }
 
 trait GitStatsService extends HttpService {
-  val ROOT  = "git-stats"
-  val route =
-    pathPrefix(ROOT / "[^/]+".r / "[^/]+".r) { (owner, repo) =>
+  val root     = "git-stats"
+  val apiRoot  = root + "-api"
+
+  val apiRoute =
+    pathPrefix(apiRoot / "[^/]+".r / "[^/]+".r) { (owner, repo) =>
       pathPrefix("commits") {
         (pathEnd & get) {
           complete {
@@ -54,8 +57,26 @@ trait GitStatsService extends HttpService {
       }
     }
 
-  private def gitApiCall(endPoint: String) = (IO(Http) ? Get("https://api.github.com" + endPoint)).mapTo[HttpResponse]
+  val webRoute =
+    pathPrefix(root) {
+      serveResourceWithParam(INDEX, "keyword") ~
+      pathPrefix("show-repo") { serveResourceWithParam(SHOW_REPO, "repo") }
+    } ~ getFromResourceDirectory("web")
+
+  val route = webRoute ~ apiRoute
+
+  private def serveResourceWithParam(page: String, param: String) =
+    pathEnd {
+      parameter(param) { repo =>
+        getFromResource(page)
+      }
+    }
 
   def getCommits        (repo: String): Future[List[Commit]]
   def getIngestedCommits(repo: String): Future[IngestedCommits]
+}
+
+object Pages {
+  val INDEX     = "web/index.html"
+  val SHOW_REPO = "web/show-repo.html"
 }
