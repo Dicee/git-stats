@@ -2,6 +2,10 @@
 
 A simple mini-project using the Github V3 API for generating basic stats on Github repositories. I started this as a recreational full Javascript application (although I hate Javascript), but I ended up wanting to write a wrapper REST service in Scala to practice my favourite language. That's why there's a `full-js` and a `spray-based` folder. I won't work on the full JS application anymore, keeping it only for history.
 
+#### Note
+
+I zipped the contents of `full-js` so that Github does not count them as JS on the repository, since it is mostly a duplicate of the JS under `spray-based`.
+
 ##Technologies 
 
 ### Client-side
