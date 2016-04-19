@@ -2,6 +2,9 @@ package com.dici
 
 import spray.json.{JsNull, JsString, JsValue}
 
+import scala.collection.immutable.ListMap
+import scala.collection.mutable
+
 package object gitStats {
   implicit class JsValueToJsObject(value: JsValue) {
     private val node = value.asJsObject
@@ -23,5 +26,11 @@ package object gitStats {
   // TODO: get rid of this duplication
   implicit class AugmentedImmutableMap[K, V](map: Map[K, V]) {
     def mapKeys[KR](f: K => KR) = map.map { case (k, v) => (f(k), v) }.toMap
+
+    def mapKeysPreservingOrder[KR](f: K => KR) = {
+      val newMap = mutable.LinkedHashMap[KR, V]()
+      for ((k, v) <- map) { newMap += f(k) -> v }
+      ListMap(newMap.toSeq: _*)
+    }
   }
 }
