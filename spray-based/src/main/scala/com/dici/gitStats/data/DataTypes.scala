@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import spray.json._
 
-
 final case class Committer(name: String, email: String, html_url: String, avatar_url: String)
 // TODO: eliminate this duplication without degrading the conciseness of the serialization code too much
 final case class CommitInfo(message: String, date: DateTime)

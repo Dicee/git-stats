@@ -6,28 +6,17 @@ function parseURL() {
 
 function showRepo(repo) {
     getCommitsStats(repo);
-    getContributorsStats(repo, displayContributionsCharts);
+//    getContributorsStats(repo, displayContributionsCharts);
 }
 
 function getCommitsStats(repo) {
-    var committers         = new Set();
-    var committersList     = document.getElementById("committers");
-    var latestCommits      = [];
-
-    consumeCommits(repo, function (commit, eof) {
-        var committer = commit.committer;
-        if (!committers.has(committer.name)) {
-            addToCommittersTable(committer);
-            committers.add(committer.name);
-        }
-        latestCommits.push(commit);
-
-        if (eof) {
-            displayBestCommittersChart   (latestCommits                 );
-            displayCommitsTimelineChart  (latestCommits, committers.size);
-            displayPerDayOfWeekStatsChart(latestCommits, committers     );
-            displayPerTimeOfDayStatsChart(latestCommits, committers     );
-        }
+    consumeCommits(repo, function (response) {
+        var committers = response.committers;
+        for (let committer of committers) addToCommittersTable(committer);
+        displayBestCommittersChart (response.commitsCount              );
+        displayCommitsTimelineChart(response.commitsTimelineByCommitter, committers.length);
+//        displayPerDayOfWeekStatsChart(latestCommits, committers     );
+//        displayPerTimeOfDayStatsChart(latestCommits, committers     );
     });
 }
 
@@ -48,21 +37,16 @@ function addToCommittersTable(committer) {
     committersBody.appendChild(tr);
 }
 
-function displayBestCommittersChart(commits) {
-    var counter = new Counter();
-    for (let commit of commits) counter.inc(commit.committer.name);
+function displayBestCommittersChart(commitsCount) {
+    commitsCount.unshift(new Array("Committer", "Commits"));
 
-    var stats = counter.entries().sort(function(x, y) { return y[1] - x[1]; });
-    stats.unshift(new Array("Committer", "Commits"));
-
-    var data = new google.visualization.arrayToDataTable(stats);
+    var data = new google.visualization.arrayToDataTable(commitsCount);
     var chart = new google.charts.Bar(document.getElementById('bestCommittersChart'));
     var options = {
         title: 'Best committers',
-        height: 30 + stats.length * 40,
+        height: 30 + commitsCount.length * 40,
         backgroundColor: { fill:'transparent' },
         legend: { position: 'none' },
-        //chart: { title: 'Best committers', subtitle: '(by number of commits)' },
         bars: 'horizontal',
         axes: {
             x: { 0: { side: 'top', label: 'Commits'} },
@@ -156,7 +140,7 @@ function baseDisplayContributionsTotalPieChart(changesOverTime, lastWeekWithData
     chart.draw(dataTable, { title: title });
 }
 
-function displayCommitsTimelineChart(commits, numberOfCommitters) {
+function displayCommitsTimelineChart(commitsTimelineByCommitter, numberOfCommitters) {
     var chart     = new google.visualization.Timeline(document.getElementById('commitsTimelineChart'));
     var dataTable = new google.visualization.DataTable();
 
@@ -166,24 +150,18 @@ function displayCommitsTimelineChart(commits, numberOfCommitters) {
     dataTable.addColumn({ type: 'date', id: 'Date' });
     dataTable.addColumn({ type: 'date', id: 'Date+1' });
 
-    var getKey = function(commit) { return commit.committer.name + "," + commit.date.roundToDay().getTime(); }
+    var rows = new Array();
+    forEntries(commitsTimelineByCommitter, function(committerAndDate) {
+        forEntries(committerAndDate[1], function(dateAndCommits) {
+            var committerName = committerAndDate[0];
+            var day           = new Date(dateAndCommits[0]);
+            var tooltip       = "<ul>" + dateAndCommits[1].map(function(commit) { return "<li><b>" + commit.date + ":</b> " + commit.message + "</li>"; }).join("") + "</ul>";
+            rows.push(new Array(committerName, "", tooltip, day, day.plusDays(1)));
+        });
+    });
 
-    // group the commits by author and date
-    var commitsByAuthorAndDate = new RichMap();
-    for (let commit of commits) {
-        var key         = getKey(commit);
-        var userCommits = commitsByAuthorAndDate.getOrElse(key, []);
-        userCommits.push(commit);
-        commitsByAuthorAndDate.put(key, userCommits);
-    }
-
-    dataTable.addRows(commitsByAuthorAndDate.entries().map(function(entry) {
-        var split         = entry[0].split(",");
-        var committerName = split[0];
-        var day           = new Date(parseInt(split[1]));
-        var tooltip       = "<ul>" + entry[1].map(function(commit) { return "<li><b>" + commit.date + ":</b> " + commit.message + "</li>"; }).join("") + "</ul>";
-        return new Array(committerName, "", tooltip, day, day.plusDays(1));
-    }));
+    debug(rows);
+    dataTable.addRows(rows);
     chart.draw(dataTable, { height: 70 + numberOfCommitters * 41 });
 }
 

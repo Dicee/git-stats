@@ -3,39 +3,8 @@ function searchRepository(keyword, callback, onerror) {
     callGitApi("search/repositories?q=" + keyword.trim().replace(keywordNormalizeRegex, "+"), callback, onerror);
 }
 
-function consumeCommits(repo, commitConsumer, onerror, limit = 10) {
-    consumeCommitsRec(repo, 1, commitConsumer, onerror, limit);
-}
-
-function consumeCommitsRec(repo, pageIndex, commitConsumer, onerror, limit) {
-    if (pageIndex > limit) return;
-    getCommitsPage(repo, pageIndex, function(commits, eof) {
-        for (var i = 0; i < commits.length; i++) commitConsumer(extractBestPossibleCommitInfo(commits[i]), eof && i == commits.length - 1);
-        if (!eof) consumeCommitsRec(repo, pageIndex + 1, commitConsumer, onerror, limit);
-    }, onerror, limit);
-}
-
-function getCommitsPage(repo, pageIndex, callback, onerror, limit) {
-    var expectedCommits = 100;
-    callGitApi("repos/" + repo + "/commits?per_page=" + expectedCommits + "&page=" + pageIndex, function(commits) {
-        callback(commits, commits.length < expectedCommits || pageIndex == limit);
-    });
-}
-
-function extractBestPossibleCommitInfo(commitJSON) {
-    var commitNode = commitJSON.commit;
-    var author     = commitNode.author;
-    var committer  = commitNode.committer;
-    return {
-        committer: {
-            name      : (commitJSON.author && commitJSON.author.login) || author.name  || committer.name || "Unknown user",
-            email     : author.email || committer.email,
-            html_url  : (commitJSON.author && commitJSON.author.html_url) || (commitJSON.committer && commitJSON.committer.html_url),
-            avatar_url: (commitJSON.author && commitJSON.author.avatar_url) || (commitJSON.committer && commitJSON.committer.avatar_url)
-        },
-        message: commitNode.message,
-        date   : new Date(author.date || committer.date)
-    };
+function consumeCommits(repo, callback, onerror) {
+    callGitStatsApi(repo + "/commits/process", callback)
 }
 
 function getContributorsStats(repo, callback, onerror) {
@@ -44,6 +13,10 @@ function getContributorsStats(repo, callback, onerror) {
 
 function callGitApi(endPoint, callback, onerror) {
     ajaxCall("https://api.github.com/" + endPoint, callback, onerror)
+}
+
+function callGitStatsApi(endPoint, callback, onerror) {
+    ajaxCall("/git-stats-api/" + endPoint, callback, onerror)
 }
 
 function ajaxCall(url, callback, onerror) {
