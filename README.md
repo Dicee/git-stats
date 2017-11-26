@@ -6,7 +6,7 @@ A simple mini-project using the Github V3 API for generating basic stats on Gith
 
 I zipped the contents of `full-js` so that Github does not count them as JS on the repository, since it is mostly a duplicate of the JS under `spray-based`.
 
-##Technologies 
+## Technologies 
 
 ### Client-side
 
